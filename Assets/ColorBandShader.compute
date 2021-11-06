@@ -1,0 +1,22 @@
+#pragma kernel ColorBand
+
+float Width;
+float Height;
+int Colorbands;
+float4 TintColor;
+
+sampler2D Input;
+RWTexture2D<float4> Output;
+
+[numthreads(8,8,1)]
+void ColorBand (uint3 id : SV_DispatchThreadID)
+{
+	float2 position = float2(id.x / Width, id.y / Height);
+
+	float4 col = tex2Dlod(Input, float4(position.x, position.y, 0, 0));
+
+    float avg_col = ((col.x + col.y + col.z) / 3) * Colorbands;
+    float new_col = floor(avg_col + 0.5f) / Colorbands;
+
+	Output[id.xy] = float4(new_col + TintColor.x, new_col + TintColor.y, new_col + TintColor.z, 1);
+}
